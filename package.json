@@ -1,0 +1,23 @@
+{
+  "name": "The_Road_to_learn_React",
+  "version": "1.0.0",
+  "description": "Warming myself up by using basic React tools to building a Hacker News application that interacts with a real world API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serignembackeka/The_Road_to_learn_React.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/serignembackeka/The_Road_to_learn_React/issues"
+  },
+  "homepage": "https://github.com/serignembackeka/The_Road_to_learn_React#readme",
+  "dependencies": {
+    "react": "^17.0.1"
+  }
+}
