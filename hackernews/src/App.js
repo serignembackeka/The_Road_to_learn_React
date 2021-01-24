@@ -6,7 +6,6 @@ const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 
-const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
 class App extends Component{
   constructor(props){
     super(props);
@@ -18,7 +17,6 @@ class App extends Component{
 
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
-    this.isSearched = this.isSearched.bind(this);
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
   }
 
@@ -27,14 +25,16 @@ class App extends Component{
   }
 
   componentDidMount(){
-    fetch(url)
+    const { searchTerm } = this.state;
+
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error);
   }
 
   onDismiss(id){
-    const isNotId = item => item.ObjectID !== id
+    const isNotId = item => item.objectID !== id;
     const updatedHits = this.state.result.hits.filter(isNotId);
     this.setState({
       result: { ...this.state.result, hits: updatedHits }
@@ -45,11 +45,7 @@ class App extends Component{
     this.setState({ searchTerm: event.target.value });
   }
 
-  isSearched (searchTerm){
-    return function (item){
-      return item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    };
-  }
+  
 
   render(){
 
@@ -75,7 +71,6 @@ class App extends Component{
           ? <Table 
               list= {result.hits}
               pattern= {searchTerm}
-              isSearched={this.isSearched}
               onDismiss= {this.onDismiss}
             />
           : null}
@@ -100,7 +95,7 @@ const Search = ({value, onChange, children}) =>{
       );
 }
 
-function Table({list, pattern, isSearched, onDismiss}){
+function Table({list, pattern, onDismiss}){
 
     const largeColumn = {
       width: "40%"
@@ -112,29 +107,33 @@ function Table({list, pattern, isSearched, onDismiss}){
       width: "40%"
     }
 
-      return(
-          <div className="table">
-          {list.filter(isSearched(pattern)).map((item) =>
-              <div key={item.ObjectID} className="table-row">
-                <span style={largeColumn}>
-                  <a href={item.url}>{item.title}</a>
-                </span>
-                <span style={midColumn}>{item.author}</span>
-                <span style={smallColumn}>{item.num_comments}</span>
-                <span style={smallColumn}>{item.points}</span>
-                <span style={smallColumn}>
-                  <Button
-                    btn="Dismiss" 
-                    type="type"
-                    className="button-inline"
-                    onClick={()=>onDismiss(item.ObjectID)}
-                  />
-                </span>
-              </div>
-              )}
+    const isSearched = searchTerm => {
+      return function (item){
+        return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+      };
+    }
 
-          </div>
-      );
+    return(
+      <div className="table">
+        {list.filter(isSearched(pattern)).map((item) =>
+            <div key={item.objectID} className="table-row">
+              <span style={largeColumn}>
+                <a href={item.url}>{item.title}</a>
+              </span>
+              <span style={midColumn}>{item.author}</span>
+              <span style={smallColumn}>{item.num_comments}</span>
+              <span style={smallColumn}>{item.points}</span>
+              <span style={smallColumn}>
+                <Button
+                  btn="Dismiss" 
+                  type="type"
+                  className="button-inline"
+                  onClick={()=>onDismiss(item.ObjectID)}
+                />
+              </span>
+            </div>
+            )}
+      </div>);
 }
 
 function Button(props){
