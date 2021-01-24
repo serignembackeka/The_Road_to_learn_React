@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import { Search } from './components/Search/Search';
-import { Table } from './components/Table/Table';
+
 
 const list = [
   {
@@ -62,6 +61,7 @@ class App extends Component{
       <div className="App">
 
         <Search
+          children="Search"
           value={searchTerm} // The uncontrolled attribute or component is now controlled
           onChange={this.onSearchChange}
         />
@@ -69,12 +69,76 @@ class App extends Component{
         <Table 
           list= {list}
           pattern= {searchTerm}
+          isSearched={this.isSearched}
           onDismiss= {this.onDismiss}
         />
         
       </div>
     );
   }
+}
+
+const Search = ({value, onChange, children}) =>{
+
+      return(
+          <div>
+              <form>
+                  {children} <input 
+                      type="text"
+                      value={value}
+                      onChange={onChange}
+                  />
+              </form>
+          </div>
+      );
+}
+
+function Table({list, pattern, isSearched, onDismiss}){
+
+      return(
+          <div>
+          {list.filter(isSearched(pattern)).map(item => {
+              return (
+              <div key={item.ObjectID}>
+                <span>
+                  <a href={item.url}>{item.title}</a>
+                </span>
+                <span>{item.author}</span>
+                <span>{item.num_comments}</span>
+                <span>{item.points}</span>
+                <span>
+                  <Button
+                    btn="Dismiss" 
+                    type="type"
+                    onClick={()=>onDismiss(item.ObjectID)}
+                  />
+                </span>
+              </div>
+              )
+              })}
+
+          </div>
+      );
+}
+
+function Button(props){
+    const {
+      btn,
+      type,
+      className = "",
+      onClick
+    } = props
+
+    return(
+    <div>
+      <button
+        type={type}
+        onClick={onClick}
+        className={className}
+      >
+        {btn}
+      </button>
+    </div>);
 }
 
 export default App;

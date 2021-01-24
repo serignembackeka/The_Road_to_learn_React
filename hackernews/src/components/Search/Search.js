@@ -1,19 +1,17 @@
 import React, { Component } from 'react';
 
-export class Search extends Component(){
-    constructor(props){
-        this.state = props
-    }
+export class Search extends Component{
 
     render(){
         const {
             value,
-            onChange
-        } = this.props
+            onChange,
+            children
+        } = this.props;
         return(
             <div>
                 <form>
-                    <input 
+                    {children} <input 
                         type="text"
                         value={value}
                         onChange={onChange}
