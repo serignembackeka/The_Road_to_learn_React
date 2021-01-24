@@ -1,42 +1,44 @@
 import React, {Component} from 'react';
 import './App.css';
 
+const DEFAULT_QUERY = 'redux';
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
 
-const list = [
-  {
-    title: "React",
-    url: 'https://facebook.github.io/react/',
-    author: "Mister_K",
-    num_comments: 3,
-    points: 4,
-    ObjectID: 0
-  },
-  {
-    title: "Redux",
-    url: 'https://facebook.github.io/react/',
-    author: "SMK",
-    num_comments: 2,
-    points: 5,
-    ObjectID: 1
-  }
-];
+const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
 class App extends Component{
   constructor(props){
     super(props);
 
     this.state = {
-      list: list,
-      searchTerm: ""
+      result: null,
+      searchTerm: DEFAULT_QUERY
     };
 
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.isSearched = this.isSearched.bind(this);
+    this.setSearchTopStories = this.setSearchTopStories.bind(this);
+  }
+
+  setSearchTopStories(result){
+    this.setState({ result });
+  }
+
+  componentDidMount(){
+    fetch(url)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error);
   }
 
   onDismiss(id){
-    const updatedList = this.state.list.filter(item => item.ObjectID !== id);
-    this.setState({list: updatedList});
+    const isNotId = item => item.ObjectID !== id
+    const updatedHits = this.state.result.hits.filter(isNotId);
+    this.setState({
+      result: { ...this.state.result, hits: updatedHits }
+    });
   }
 
   onSearchChange (event){
@@ -51,27 +53,32 @@ class App extends Component{
 
   render(){
 
+    console.log(this.state);
+
     const {
-      list,
+      result,
       searchTerm
     } = this.state; // Destructuring the state to avoid writing "this.state.list" or
                     // "this.state.searchTerm" instead, now I can write "list" or "searchTerm"
-
+    
     return (
-      <div className="App">
+      <div className="page">
+        <div className="interactions">
+          <Search
+            children="Search"
+            value={searchTerm} // The uncontrolled attribute or component is now controlled
+            onChange={this.onSearchChange}
+          />
+        </div>
 
-        <Search
-          children="Search"
-          value={searchTerm} // The uncontrolled attribute or component is now controlled
-          onChange={this.onSearchChange}
-        />
-
-        <Table 
-          list= {list}
-          pattern= {searchTerm}
-          isSearched={this.isSearched}
-          onDismiss= {this.onDismiss}
-        />
+        {result
+          ? <Table 
+              list= {result.hits}
+              pattern= {searchTerm}
+              isSearched={this.isSearched}
+              onDismiss= {this.onDismiss}
+            />
+          : null}
         
       </div>
     );
@@ -95,27 +102,36 @@ const Search = ({value, onChange, children}) =>{
 
 function Table({list, pattern, isSearched, onDismiss}){
 
+    const largeColumn = {
+      width: "40%"
+    }
+    const midColumn = {
+      width: "40%"
+    }
+    const smallColumn = {
+      width: "40%"
+    }
+
       return(
-          <div>
-          {list.filter(isSearched(pattern)).map(item => {
-              return (
-              <div key={item.ObjectID}>
-                <span>
+          <div className="table">
+          {list.filter(isSearched(pattern)).map((item) =>
+              <div key={item.ObjectID} className="table-row">
+                <span style={largeColumn}>
                   <a href={item.url}>{item.title}</a>
                 </span>
-                <span>{item.author}</span>
-                <span>{item.num_comments}</span>
-                <span>{item.points}</span>
-                <span>
+                <span style={midColumn}>{item.author}</span>
+                <span style={smallColumn}>{item.num_comments}</span>
+                <span style={smallColumn}>{item.points}</span>
+                <span style={smallColumn}>
                   <Button
                     btn="Dismiss" 
                     type="type"
+                    className="button-inline"
                     onClick={()=>onDismiss(item.ObjectID)}
                   />
                 </span>
               </div>
-              )
-              })}
+              )}
 
           </div>
       );
